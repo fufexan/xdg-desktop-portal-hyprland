@@ -8,6 +8,9 @@
   pkg-config,
   wayland-protocols,
   wayland-scanner,
+  # should be overridden with actual hyprland package used.
+  # in the Hyprland flake, it's overridden with the flake-provided package
+  hyprland,
   hyprland-protocols,
   inih,
   libdrm,
@@ -18,7 +21,7 @@
   libsForQt5,
   version ? "git",
 }: let
-  hyprland-share-picker = libsForQt5.callPackage ./hyprland-share-picker.nix {inherit version;};
+  hyprland-share-picker = libsForQt5.callPackage ./hyprland-share-picker.nix {inherit version hyprland;};
 in
   stdenv.mkDerivation {
     pname = "xdg-desktop-portal-hyprland";
@@ -32,7 +35,8 @@ in
     buildInputs = [inih libdrm mesa pipewire systemd wayland wayland-protocols];
 
     preConfigure = ''
-      rmdir protocols/hyprland-protocols
+      # for some reason rmdir doesn't work in a dirty tree
+      rmdir protocols/hyprland-protocols || true
 
       ln -s ${hyprland-protocols.outPath}/ protocols/hyprland-protocols
     '';
